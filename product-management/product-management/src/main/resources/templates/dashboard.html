@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Product Statistics</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border:none;
+            text-decoration:none;
+            background:#667eea;
+            color:white;
+            display:inline-block;
+            margin-bottom:20px;
+        }
+        .btn:hover { background:#5568d3; }
+        .stats-grid {
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap:20px;
+            margin-bottom:30px;
+        }
+        .card {
+            padding:20px;
+            border-radius:10px;
+            background:#f8f9ff;
+            box-shadow:0 4px 10px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            font-size:18px;
+            margin-bottom:10px;
+            color:#333;
+        }
+        .card .value {
+            font-size:24px;
+            font-weight:bold;
+            color:#667eea;
+        }
+        table {
+            width:100%;
+            border-collapse:collapse;
+            margin-top:10px;
+        }
+        th, td {
+            padding:8px 10px;
+            text-align:left;
+            border-bottom:1px solid #ddd;
+        }
+        th {
+            background:#667eea;
+            color:white;
+        }
+        .section-title {
+            margin-top:20px;
+            margin-bottom:10px;
+            font-size:18px;
+            color:#333;
+        }
+        .tag-warning {
+            display:inline-block;
+            padding:3px 8px;
+            border-radius:4px;
+            background:#ffc107;
+            color:#333;
+            font-size:12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 Product Statistics Dashboard</h1>
+
+    <a th:href="@{/products}" class="btn">← Back to Products</a>
+
+    <!-- Top cards -->
+    <div class="stats-grid">
+        <div class="card">
+            <h2>Total Products</h2>
+            <div class="value" th:text="${totalProducts}">0</div>
+        </div>
+        <div class="card">
+            <h2>Total Inventory Value</h2>
+            <div class="value"
+                 th:text="'$' + ${#numbers.formatDecimal(totalValue, 1, 2)}">$0.00</div>
+        </div>
+        <div class="card">
+            <h2>Average Price</h2>
+            <div class="value"
+                 th:text="'$' + ${#numbers.formatDecimal(averagePrice, 1, 2)}">$0.00</div>
+        </div>
+    </div>
+
+    <!-- Products by Category -->
+    <div class="card">
+        <h2 class="section-title">Products by Category</h2>
+        <table th:if="${categoryCounts != null and !categoryCounts.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Category</th>
+                <th>Count</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="entry : ${categoryCounts}">
+                <td th:text="${entry.key}">Category</td>
+                <td th:text="${entry.value}">0</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${categoryCounts == null or categoryCounts.isEmpty()}">No categories found.</p>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="card">
+        <h2 class="section-title">
+            Low Stock Products (quantity &lt;
+            <span th:text="${lowStockThreshold}">10</span>)
+        </h2>
+        <table th:if="${lowStockProducts != null and !lowStockProducts.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Category</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${lowStockProducts}">
+                <td th:text="${p.productCode}">P001</td>
+                <td th:text="${p.name}">Product Name</td>
+                <td>
+                    <span th:text="${p.quantity}">0</span>
+                    <span class="tag-warning">Low</span>
+                </td>
+                <td th:text="${p.category}">Category</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${lowStockProducts == null or lowStockProducts.isEmpty()}">
+            🎉 No low-stock products. You're well stocked!
+        </p>
+    </div>
+
+    <!-- Recent Products -->
+    <div class="card">
+        <h2 class="section-title">Recent Products (last 5)</h2>
+        <table th:if="${recentProducts != null and !recentProducts.isEmpty()}">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Created At</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${recentProducts}">
+                <td th:text="${p.productCode}">P001</td>
+                <td th:text="${p.name}">Product Name</td>
+                <td th:text="${p.category}">Category</td>
+                <td th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01</td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${recentProducts == null or recentProducts.isEmpty()}">
+            No recent products yet.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>
